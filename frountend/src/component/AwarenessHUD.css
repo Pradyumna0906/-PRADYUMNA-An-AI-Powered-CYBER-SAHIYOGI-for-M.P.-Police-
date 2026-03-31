@@ -1,0 +1,69 @@
+.awareness-widget {
+  min-width: 260px;
+  background: rgba(0, 255, 255, 0.01);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 255, 255, 0.1);
+  border-radius: 4px;
+  font-family: 'Rajdhani', sans-serif;
+  color: rgba(0, 255, 255, 0.8);
+  box-shadow: 0 0 25px rgba(0, 255, 255, 0.05);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  margin-bottom: 15px;
+}
+
+/* Location Box */
+.loc-content {
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  position: relative;
+}
+
+.loc-icon svg { width: 30px; height: 30px; color: #0ff; filter: drop-shadow(0 0 5px #0ff); }
+.loc-details { display: flex; flex-direction: column; }
+.loc-main { font-size: 1.2rem; font-weight: 800; color: #fff; text-transform: uppercase; }
+.loc-sub { font-size: 0.6rem; letter-spacing: 2px; opacity: 0.6; }
+
+.loc-scan-bar {
+  position: absolute;
+  bottom: 0; left: 0; width: 100%; height: 2px;
+  background: linear-gradient(90deg, transparent, #0ff, transparent);
+  animation: loc-scan 3s infinite linear;
+}
+
+/* Power Cell */
+.power-cell { min-width: 120px; }
+.battery-viz { padding: 15px; display: flex; align-items: flex-end; gap: 10px; }
+.battery-base { 
+  width: 25px; height: 60px; 
+  border: 1px solid rgba(0,255,255,0.3); 
+  border-radius: 2px; 
+  position: relative; 
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: flex-end;
+}
+.battery-level { width: 100%; transition: height 0.5s ease; border-radius: 1px; }
+.charging-bolt { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; font-size: 0.8rem; text-shadow: 0 0 5px #000; }
+.battery-text { display: flex; flex-direction: column; }
+.b-pct { font-size: 1.5rem; font-weight: 900; color: #fff; }
+.b-stat { font-size: 0.5rem; letter-spacing: 1px; opacity: 0.5; }
+
+/* Connectivity HUD */
+.conn-item { padding: 10px 15px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(0,255,255,0.05); }
+.c-icon svg { width: 18px; height: 18px; color: #f0f; opacity: 0.7; }
+.c-info { display: flex; flex-direction: column; }
+.c-lab { font-size: 0.5rem; letter-spacing: 1.5px; opacity: 0.5; }
+.c-val { font-size: 0.7rem; font-weight: 800; color: #fff; }
+
+@keyframes loc-scan {
+  0% { transform: translateY(0); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateY(-50px); opacity: 0; }
+}
+
+@media (max-width: 768px) {
+  .awareness-widget { min-width: 150px; }
+}

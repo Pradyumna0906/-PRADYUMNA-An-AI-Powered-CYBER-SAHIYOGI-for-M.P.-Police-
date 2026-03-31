@@ -1,0 +1,88 @@
+.tactical-rotator-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 500px;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0.2;
+  transition: all 0.5s ease;
+}
+
+.tactical-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.4));
+}
+
+.ring {
+  fill: none;
+  stroke: rgba(0, 255, 255, 0.5);
+  stroke-width: 0.5;
+  transform-origin: center;
+  transition: stroke 0.5s ease;
+}
+
+.outer-ring {
+  animation: rotate-cw 20s linear infinite;
+}
+
+.middle-ring {
+  animation: rotate-ccw 15s linear infinite;
+  stroke-width: 1;
+  stroke: rgba(0, 255, 255, 0.3);
+}
+
+.inner-ring {
+  animation: rotate-cw 10s linear infinite;
+  stroke-dashoffset: 50;
+}
+
+.crosshair-tick {
+  stroke: rgba(0, 255, 255, 0.8);
+  stroke-width: 1;
+}
+
+.tactical-text {
+  fill: #0ff;
+  font-size: 5px;
+  font-family: 'Courier New', Courier, monospace;
+  letter-spacing: 1px;
+  opacity: 0.6;
+}
+
+/* Reactivity States */
+.listening .ring {
+  stroke: #0ff;
+  filter: drop-shadow(0 0 8px #0ff);
+}
+
+.processing .outer-ring {
+  animation: rotate-cw 5s linear infinite;
+  stroke: #f0f;
+  filter: drop-shadow(0 0 8px #f0f);
+}
+
+.processing .middle-ring {
+  animation: rotate-ccw 4s linear infinite;
+  stroke: #f0f;
+}
+
+@keyframes rotate-cw {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes rotate-ccw {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@media (max-width: 768px) {
+  .tactical-rotator-container {
+    width: 300px;
+    height: 300px;
+  }
+}

@@ -1,0 +1,242 @@
+.app-container {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+}
+
+/* Global HUD Layers - Scanlines */
+.app-container::before {
+  content: " ";
+  display: block;
+  position: fixed;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  z-index: 10000;
+  pointer-events: none;
+  background-size: 100% 4px, 3px 100%;
+  opacity: 0.04;
+}
+
+.hud-grid-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-image: 
+    linear-gradient(rgba(0, 255, 255, 0.01) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 255, 0.01) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: -10;
+  animation: grid-pulse 15s infinite;
+}
+
+@keyframes grid-pulse {
+  0%, 100% { opacity: 0.2; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.05); }
+}
+
+/* Global Reactivity Flares */
+.reactivity-container.active-listening {
+  animation: global-glow-cyan 3s infinite alternate;
+}
+
+.reactivity-container.active-processing {
+  animation: global-glow-magenta 2s infinite alternate;
+}
+
+@keyframes global-glow-cyan {
+  from { box-shadow: inset 0 0 40px rgba(0, 255, 255, 0); }
+  to { box-shadow: inset 0 0 60px rgba(0, 255, 255, 0.05); }
+}
+
+@keyframes global-glow-magenta {
+  from { box-shadow: inset 0 0 40px rgba(255, 0, 255, 0); }
+  to { box-shadow: inset 0 0 60px rgba(255, 0, 255, 0.05); }
+}
+
+/* Data Stream Gagdet */
+.data-stream {
+  position: fixed;
+  top: 150px;
+  font-family: 'Courier New', Courier, monospace;
+  color: #0ff;
+  opacity: 0.2;
+  pointer-events: none;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.data-stream.left { left: 20px; }
+.data-stream.right { right: 20px; text-align: right; }
+
+/* Neural Connection Gagdet */
+.neural-line {
+  animation: neural-pulse 12s linear infinite;
+}
+
+@keyframes neural-pulse {
+  from { stroke-dashoffset: 100; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* Base UI Structural Elements */
+.header {
+  padding: 1.5rem 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 200; /* Higher than UI panels */
+  background: rgba(10, 10, 15, 0.4);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #fff;
+}
+
+.advanced-hud-wrapper {
+  flex: 1;
+  position: relative;
+  width: 100%;
+}
+
+/* Micro-Telemetry Points */
+.telemetry-point {
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: telemetry-float 4s ease-in-out infinite;
+}
+
+.telemetry-dot {
+  width: 4px;
+  height: 4px;
+  background: #0ff;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #0ff;
+}
+
+.telemetry-label {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.5rem;
+  color: rgba(0, 255, 255, 0.4);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+@keyframes telemetry-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Neon Panel Borders (Applied globally to HUD elements) */
+.status-panel, .hud-panel, .terminal-window, .terminal-wrapper {
+  border: 1px solid rgba(0, 255, 255, 0.2) !important;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.05), inset 0 0 10px rgba(0, 255, 255, 0.01) !important;
+  position: relative;
+}
+
+.tactical-blade {
+  background: transparent !important; /* Always Ghosted */
+  backdrop-filter: none !important;
+}
+
+/* Vertical Scanline Pulse */
+.app-container::after {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100px;
+  background: linear-gradient(to bottom, transparent, rgba(0, 255, 255, 0.05), transparent);
+  z-index: 10001;
+  pointer-events: none;
+  animation: global-scan-pulse 8s linear infinite;
+}
+
+@keyframes global-scan-pulse {
+  0% { transform: translateY(-100vh); opacity: 0.1; }
+  100% { transform: translateY(100vh); opacity: 0.05; }
+}
+
+.global-background-layer {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  z-index: -5;
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.global-waveform-wrapper {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 400px;
+  display: flex;
+  justify-content: center;
+  opacity: 0.3;
+}
+
+/* Chromatic Aberration Pulse */
+.active-processing status-value, .active-processing .gauge-text {
+  text-shadow: 2px 0 2px rgba(255,0,0,0.5), -2px 0 2px rgba(0,255,255,0.5);
+  animation: chromatic-glitch 0.2s infinite alternate;
+}
+
+@keyframes chromatic-glitch {
+  from { transform: translateX(-1px); }
+  to { transform: translateX(1px); }
+}
+
+.core-sync-readout {
+  position: fixed;
+  bottom: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.6rem;
+  letter-spacing: 4px;
+  color: #0ff;
+  opacity: 0.8;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 4px 25px;
+  border-radius: 12px 12px 0 0;
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-bottom: none;
+  z-index: 150;
+}
+
+.readout-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #0ff;
+  box-shadow: 0 0 10px #0ff;
+  animation: sync-pulse 1.5s infinite alternate;
+}
+
+@keyframes sync-pulse {
+  from { opacity: 0.1; transform: scale(0.8); }
+  to { opacity: 0.8; transform: scale(1.2); }
+}
+
+@media (max-width: 768px) {
+  .header { padding: 1rem 5%; }
+  .logo { font-size: 1.2rem; }
+  .core-sync-readout { display: none; }
+}

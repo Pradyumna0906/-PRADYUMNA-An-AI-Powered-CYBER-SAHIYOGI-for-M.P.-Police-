@@ -1,0 +1,31 @@
+services:
+  # JARVIS Backend (Node.js API)
+  - type: web
+    name: jarvis-backend
+    env: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_VERSION
+        value: 18.0.0
+      - key: GROQ_API_KEY
+        sync: false # User must set this in Render Dashboard
+      - key: PORT
+        value: 5001
+
+  # JARVIS Frontend (React Static site)
+  - type: web
+    name: jarvis-frontend
+    env: static
+    plan: free
+    rootDir: frountend
+    buildCommand: npm install && npm run build
+    staticPublishPath: build
+    envVars:
+      - key: REACT_APP_BACKEND_URL
+        fromService:
+          type: web
+          name: jarvis-backend
+          property: host
