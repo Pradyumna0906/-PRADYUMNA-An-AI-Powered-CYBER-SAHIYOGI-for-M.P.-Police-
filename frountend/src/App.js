@@ -9,7 +9,6 @@ import { ClockWeatherHUD, TacticalMapHUD } from './component/AdvancedHUD';
 import TacticalRotator from './component/TacticalRotator';
 import { UnifiedTacticalHUD } from './component/UnifiedDiagnostics';
 import { NeuralWaveform, ScanningHexGrid } from './component/FuturisticGauges';
-import Draggable from 'react-draggable';
 
 let BACKEND = process.env.REACT_APP_BACKEND_URL;
 if (!BACKEND) {
@@ -71,13 +70,13 @@ const NeuralLines = ({ positions }) => {
 function App() {
   const [blobConfig, setBlobConfig] = useState({ colorPreset: 'Default', shape: 'Auto', scaleMult: 1.0, sensitivity: 1.0, dragEnabled: false });
 
-  // Classic Airy Layout (based on user screenshot)
-  const [positions, setPositions] = useState({
-    terminal: { x: 30, y: 250 },
-    map: { x: 30, y: Math.max(window.innerHeight - 250, 600) },
-    hud: { x: Math.max(window.innerWidth - 340, 450), y: 120 },
-    status: { x: Math.max(window.innerWidth - 340, 450), y: 320 },
-    tactical: { x: Math.max(window.innerWidth - 340, 450), y: Math.max(window.innerHeight - 200, 550) },
+  // 🔒 PERFECT LOCKDOWN: Hardcoded Layout
+  const [positions] = useState({
+    terminal: { x: 47, y: 164 },
+    map: { x: 1037, y: 655 },
+    hud: { x: 1339, y: 112 },
+    status: { x: 1276, y: 221 },
+    tactical: { x: 1360, y: 541 },
   });
 
   const [zIndices, setZIndices] = useState({ hud: 100, status: 100, terminal: 100, map: 100, tactical: 100, blob: 0 });
@@ -88,22 +87,6 @@ function App() {
   });
   const [aiLatency, setAiLatency] = useState(0);
 
-  const terminalRef = useRef(null);
-  const mapRef = useRef(null);
-  const hudRef = useRef(null);
-  const statusRef = useRef(null);
-  const tacticalRef = useRef(null);
-
-  const handleDrag = (key, data) => {
-    setPositions(prev => ({ ...prev, [key]: { x: data.x, y: data.y } }));
-  };
-  useEffect(() => {
-    try { 
-      let stored = localStorage.getItem('cyber-sahiyogi-v3-layout');
-      if (stored) setPositions(prev => ({ ...prev, ...JSON.parse(stored) })); 
-    } catch (e) {}
-  }, []);
-
   const bringToFront = (comp) => {
     setZIndices(prev => {
       const keys = Object.keys(prev);
@@ -111,10 +94,6 @@ function App() {
       return { ...prev, [comp]: maxZ + 1 };
     });
   };
-
-  useEffect(() => {
-    try { localStorage.setItem('cyber-sahiyogi-v3-layout', JSON.stringify(positions)); } catch (e) {}
-  }, [positions]);
 
   const [chatHistory, setChatHistory] = useState([]);
   const [interimText, setInterimText] = useState('');
@@ -315,35 +294,25 @@ function App() {
       <div className="advanced-hud-wrapper">
         <Nabbar blobConfig={blobConfig} setBlobConfig={setBlobConfig} />
 
-        <Draggable nodeRef={hudRef} position={{ x: positions.hud.x, y: positions.hud.y }} onStart={() => bringToFront('hud')} onStop={(e, data) => handleDrag('hud', data)}>
-          <div ref={hudRef} className="hud-component-fixed" style={{ zIndex: zIndices.hud, position: 'absolute', left: 0, top: 0 }}>
-            <ClockWeatherHUD isListening={isListening} isProcessing={isProcessing} />
-          </div>
-        </Draggable>
+        <div className="hud-component-fixed" style={{ zIndex: zIndices.hud, position: 'absolute', left: positions.hud.x, top: positions.hud.y }} onMouseDown={() => bringToFront('hud')}>
+          <ClockWeatherHUD isListening={isListening} isProcessing={isProcessing} />
+        </div>
 
-        <Draggable nodeRef={statusRef} position={{ x: positions.status.x, y: positions.status.y }} onStart={() => bringToFront('status')} onStop={(e, data) => handleDrag('status', data)}>
-          <div ref={statusRef} className="hud-component-fixed" style={{ zIndex: zIndices.status, position: 'absolute', left: 0, top: 0 }}>
-            <Status isListening={isListening} backendConnected={backendConnected} isProcessing={isProcessing} isSpeaking={isSpeaking} systemStats={systemStats} aiLatency={aiLatency} />
-          </div>
-        </Draggable>
+        <div className="hud-component-fixed" style={{ zIndex: zIndices.status, position: 'absolute', left: positions.status.x, top: positions.status.y }} onMouseDown={() => bringToFront('status')}>
+          <Status isListening={isListening} backendConnected={backendConnected} isProcessing={isProcessing} isSpeaking={isSpeaking} systemStats={systemStats} aiLatency={aiLatency} />
+        </div>
 
-        <Draggable nodeRef={mapRef} position={{ x: positions.map.x, y: positions.map.y }} onStart={() => bringToFront('map')} onStop={(e, data) => handleDrag('map', data)}>
-          <div ref={mapRef} className="hud-component-fixed" style={{ zIndex: zIndices.map, position: 'absolute', left: 0, top: 0 }}>
-            <TacticalMapHUD />
-          </div>
-        </Draggable>
+        <div className="hud-component-fixed" style={{ zIndex: zIndices.map, position: 'absolute', left: positions.map.x, top: positions.map.y }} onMouseDown={() => bringToFront('map')}>
+          <TacticalMapHUD />
+        </div>
 
-        <Draggable nodeRef={terminalRef} position={{ x: positions.terminal.x, y: positions.terminal.y }} onStart={() => bringToFront('terminal')} onStop={(e, data) => handleDrag('terminal', data)}>
-          <div ref={terminalRef} className="hud-component-fixed" style={{ zIndex: zIndices.terminal, position: 'absolute', left: 0, top: 0 }}>
-            <Terminal chatHistory={chatHistory} interimText={interimText} isListening={isListening} streamingText={streamingText} isProcessing={isProcessing} isSpeaking={isSpeaking} onSendMessage={sendMessage} />
-          </div>
-        </Draggable>
+        <div className="hud-component-fixed" style={{ zIndex: zIndices.terminal, position: 'absolute', left: positions.terminal.x, top: positions.terminal.y }} onMouseDown={() => bringToFront('terminal')}>
+          <Terminal chatHistory={chatHistory} interimText={interimText} isListening={isListening} streamingText={streamingText} isProcessing={isProcessing} isSpeaking={isSpeaking} onSendMessage={sendMessage} />
+        </div>
 
-        <Draggable nodeRef={tacticalRef} position={{ x: positions.tactical.x, y: positions.tactical.y }} onStart={() => bringToFront('tactical')} onStop={(e, data) => handleDrag('tactical', data)}>
-          <div ref={tacticalRef} className="hud-component-fixed" style={{ zIndex: zIndices.tactical, position: 'absolute', left: 0, top: 0 }}>
-            <UnifiedTacticalHUD stats={systemStats} latency={aiLatency} />
-          </div>
-        </Draggable>
+        <div className="hud-component-fixed" style={{ zIndex: zIndices.tactical, position: 'absolute', left: positions.tactical.x, top: positions.tactical.y }} onMouseDown={() => bringToFront('tactical')}>
+          <UnifiedTacticalHUD stats={systemStats} latency={aiLatency} />
+        </div>
 
         <div className="core-sync-readout">
           <div className={`readout-dot ${backendConnected ? 'pulse-green' : ''}`}></div>
@@ -352,16 +321,6 @@ function App() {
           </span>
           <div className={`readout-dot ${backendConnected ? 'pulse-green' : ''}`}></div>
         </div>
-
-        <button 
-          onClick={() => {
-             const str = JSON.stringify(positions);
-             navigator.clipboard.writeText(str);
-             alert("COORDINATES COPIED! Paste them directly back to me in our chat so I can hardcode them forever.");
-          }} 
-          style={{ position:'fixed', bottom: '20px', left: '20px', zIndex: 99999, padding: '15px 25px', background: 'cyan', color: '#000', fontWeight: 'bold', fontSize: '1rem', border: 'none', cursor: 'pointer', borderRadius: '5px', boxShadow: '0 0 15px cyan' }}>
-          COPY COORDINATES TO CLIPBOARD
-        </button>
       </div>
     </div>
   );
