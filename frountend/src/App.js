@@ -81,6 +81,7 @@ function App() {
 
   const [zIndices, setZIndices] = useState({ hud: 100, status: 100, terminal: 100, map: 100, tactical: 100, blob: 0 });
 
+
   const [systemStats, setSystemStats] = useState({ 
     cpu: 5, ram: 0, uptime: 0, processes: [], memDetail: { total: 0, used: 0, free: 0 },
     awareness: { location: 'GLOBAL CORE', battery: { level: 100, status: 'AC' }, wifi: { ssid: 'ACTIVE LINK', signal: 0 }, bluetooth: 'OFF' }
@@ -94,6 +95,7 @@ function App() {
       return { ...prev, [comp]: maxZ + 1 };
     });
   };
+
 
   const [chatHistory, setChatHistory] = useState([]);
   const [interimText, setInterimText] = useState('');
@@ -138,7 +140,7 @@ function App() {
     socket.on('connect', () => { setBackendConnected(true); console.log("NEURAL LINK: Synchronized with Backend."); });
     socket.on('disconnect', () => setBackendConnected(false));
     
-    socket.on('jarvis:heartbeat', (data) => {
+    socket.on('pradyumna:heartbeat', (data) => {
       setSystemStats(prev => {
         // V7.1.2 ROBUST MERGE (Absolute Protection of Local Battery)
         const merged = { ...prev, ...data };
@@ -162,20 +164,20 @@ function App() {
       });
     });
     
-    socket.on('jarvis:cognition', (d) => setAiLatency(d.latency));
+    socket.on('pradyumna:cognition', (d) => setAiLatency(d.latency));
 
-    socket.on('jarvis:done', (d) => {
+    socket.on('pradyumna:done', (d) => {
       setChatHistory(prev => [...prev, { role: 'assistant', content: d.text }]);
       setStreamingText(''); setIsProcessing(false); isProcessingRef.current = false;
     });
 
-    socket.on('jarvis:error', (d) => {
+    socket.on('pradyumna:error', (d) => {
       setChatHistory(prev => [...prev, { role: 'assistant', content: `[ERROR] ${d.message}` }]);
       setIsProcessing(false); isProcessingRef.current = false;
       setStreamingText('');
     });
 
-    socket.on('jarvis:audio', (d) => {
+    socket.on('pradyumna:audio', (d) => {
       if (d.audio && d.seq !== undefined) {
         audioBufferRef.current[d.seq] = d.audio;
         const playNext = async () => {
@@ -214,7 +216,7 @@ function App() {
     audioBufferRef.current = {}; nextAudioSeqToPlayRef.current = 0;
     isSpeakingRef.current = false; setIsSpeaking(false);
     setChatHistory(prev => [...prev, { role: 'user', content: text }]);
-    socketRef.current?.emit('jarvis:send', { text });
+    socketRef.current?.emit('pradyumna:send', { text });
   }, []);
 
   const isStartingRef = useRef(false);
@@ -240,7 +242,7 @@ function App() {
             if (e.results[i].isFinal) finalStr += transcript;
             else setInterimText(transcript);
           }
-          if (finalStr.trim().length > 0 && finalStr.toLowerCase().includes('jarvis')) {
+          if (finalStr.trim().length > 0 && finalStr.toLowerCase().includes('pradyumn')) {
             sendMessage(finalStr.trim()); setInterimText('');
           }
         };

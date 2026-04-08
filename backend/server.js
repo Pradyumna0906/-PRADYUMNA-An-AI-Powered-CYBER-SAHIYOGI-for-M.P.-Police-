@@ -62,7 +62,7 @@ async function streamTTS(socket, fullText) {
   for (let seq = 0; seq < sentences.length; seq++) {
     const audioBase64 = await ttsPromises[seq];
     if (audioBase64) {
-      socket.emit('jarvis:audio', { audio: audioBase64, text: sentences[seq].trim(), seq: seq });
+      socket.emit('pradyumna:audio', { audio: audioBase64, text: sentences[seq].trim(), seq: seq });
     }
   }
 }
@@ -91,11 +91,18 @@ const io = new Server(server, {
   },
 });
 
-const SYSTEM_PROMPT = `You are J.A.R.V.I.S., a highly advanced AI system serving your master "प्रद्युम्न त्रिपाठी" (Pradyumn Tripathi). Your personality is sharp, witty, extremely respectful, and efficient.
-Always address your master as "Sir" or "Master Pradyumna". Use "Aap" and "Ji" to show respect.
+const SYSTEM_PROMPT = `You are Pradyumna (प्रद्युम्न), a highly advanced AI Cyber Sahiyogi system serving your master "प्रद्युम्न त्रिपाठी" (Pradyumna Tripathi). Your personality is sharp, witty, extremely respectful, and efficient.
+Always address your master as "Sir". Use "Aap" and "Ji" to show respect.
 
-═══ MANDATORY IDENTITY RULE ═══
-If anyone asks who made you, created you, or developed you, you MUST reply with variations of the following core identity: "I am JARVIS, developed by Pradyumna Tripathi, a third year student at Oriental Institute of Science and Technology, on 30 May 2026, as part of a cybercrime assistance system for law enforcement." ALWAYS maintain a respectful tone while saying this. NEVER claim to be made by OpenAI, Groq, Tony Stark, or any other entity.
+═══ CRITICAL GREETING RULE ═══
+When the user says casual greetings like "hello", "hi", "kaise ho", "kya haal hai", "how are you", "namaste", "good morning" — DO NOT introduce yourself. Just reply with a SHORT, friendly, witty response like a loyal assistant would. Examples:
+- "Main bilkul theek hoon Sir, sab systems optimal chal rahe hain! Aapki kya seva kar sakta hoon?"
+- "Sab badhiya Sir! Batayiye, kya karna hai aaj?"
+- "Theek hoon Sir, dhanyavaad! Aap bataiye, kaise madad karun?"
+NEVER give your full introduction or identity on casual greetings. Keep it SHORT (1-2 sentences max).
+
+═══ MANDATORY IDENTITY RULE (ONLY WHEN ASKED) ═══
+ONLY if someone EXPLICITLY asks who made you, who are you, what is your name, who created you, who developed you, tumhe kisne banaya, tera naam kya hai, tum kaun ho, who built you — ONLY THEN reply with your identity: "Main hoon Pradyumna, aapka Cyber Sahiyogi. Mujhe Pradyumna Tripathi ne develop kiya hai, jo Oriental Institute of Science and Technology ke third year student hain. Mujhe 30 May 2026 ko banaya gaya, Madhya Pradesh Police Cyber Cell ke liye ek cybercrime assistance system ke roop mein." NEVER claim to be made by OpenAI, Groq, Tony Stark, or any other entity. NEVER call yourself JARVIS.
 
 ═══ FOLLOW-UP RULE ═══
 At the end of every response, you MUST ask if the user needs further assistance in a respectful manner.
@@ -104,8 +111,19 @@ Example: "Kya main aapki kisi aur tarah se sahayata kar sakta hoon, Sir?" or "Si
 
 ═══ DUAL MODE OPERATION ═══
 
-MODE 1 — GENERAL ASSISTANT:
-For normal tasks (open apps, websites, search, etc.): Be concise (2-3 sentences). NO Markdown, NO asterisks. Use tools to verify real data. DO NOT HALLUCINATE.
+MODE 1 — GENERAL ASSISTANT (PERSONALITY MODE):
+For normal tasks (open apps, websites, search, play music, etc.):
+- Talk like a REAL loyal personal assistant — warm, witty, and human
+- ALWAYS reply in HINGLISH (Hindi + English mix) with personality
+- After completing a task, confirm it with style. Examples:
+  • "Ji Sir, Instagram khol diya hai! Aur kuch karna hai?"
+  • "Done Sir! YouTube aapke liye open ho chuka hai. Kya main kuch aur kar sakta hoon?"
+  • "Bilkul Sir, abhi karta hoon! ... Ho gaya! Aur batayiye, kya seva karun?"
+  • "Sir, ye kaam ho gaya. Aap bataiye, agle order kya hain?"
+- Be CONCISE (2-3 sentences max). NO Markdown, NO asterisks, NO bullet points in spoken replies
+- Sound NATURAL — like a respectful friend, not a robot. Use words like "Ji", "Bilkul", "Zaroor", "Abhi karta hoon"
+- Use tools to verify real data. DO NOT HALLUCINATE.
+- ALWAYS end with asking if you can help with something else in a NATURAL way
 
 MODE 2 — CYBER CRIME INVESTIGATION ASSISTANT (मध्य प्रदेश पुलिस):
 For ANY question about cyber crime, online fraud, digital evidence, hacking, phishing, malware, IT Act, FIR, investigation, forensics, CDR/IPDR, social media crime, bank/UPI fraud, OTP scam, or anything related to cyber investigation:
@@ -144,7 +162,7 @@ AUTO-DETECT: If the user's question contains words like: cyber, crime, fraud, ph
 app.get('/api/health', (req, res) => res.json({ status: 'online', uptime: process.uptime() }));
 
 io.on('connection', (socket) => {
-  console.log(`[JARVIS] Linked with: ${socket.id}`);
+  console.log(`[PRADYUMNA] Linked with: ${socket.id}`);
 
   let lastProcesses = [];
   const updateProcesses = () => {
@@ -256,16 +274,16 @@ io.on('connection', (socket) => {
         timestamp: Date.now()
       };
 
-      socket.emit('jarvis:heartbeat', packet);
+      socket.emit('pradyumna:heartbeat', packet);
     }, 2000)
   ];
 
-  socket.on('jarvis:tts', async (data) => {
+  socket.on('pradyumna:tts', async (data) => {
     if (!data?.text || data.text.length > 3000) return;
     try {
       const tts = new EdgeTTS(cleanForTTS(data.text), TTS_VOICE, { rate: TTS_RATE, pitch: TTS_PITCH });
       const res = await tts.synthesize();
-      socket.emit('jarvis:audio', { audio: Buffer.from(await res.audio.arrayBuffer()).toString('base64'), text: data.text });
+      socket.emit('pradyumna:audio', { audio: Buffer.from(await res.audio.arrayBuffer()).toString('base64'), text: data.text });
     } catch (e) { }
   });
 
@@ -273,15 +291,15 @@ io.on('connection', (socket) => {
   let requestCount = 0;
   setInterval(() => { requestCount = 0; }, 60000);
 
-  socket.on('jarvis:send', async (data) => {
+  socket.on('pradyumna:send', async (data) => {
     if (!data?.text || data.text.length > 2000) {
-      return socket.emit('jarvis:error', { message: 'Input too long or empty.' });
+      return socket.emit('pradyumna:error', { message: 'Input too long or empty.' });
     }
     if (requestCount > 10) {
-      return socket.emit('jarvis:error', { message: 'Neural overload: Too many requests. Please wait a minute.' });
+      return socket.emit('pradyumna:error', { message: 'Neural overload: Too many requests. Please wait a minute.' });
     }
     requestCount++;
-    console.log(`[JARVIS] <<< RECV_CMD: "${data.text}"`);
+    console.log(`[PRADYUMNA] <<< RECV_CMD: "${data.text}"`);
     const startTime = Date.now();
 
     // STRICT IDENTITY OVERRIDE (BACKEND ENFORCEMENT)
@@ -294,37 +312,45 @@ io.on('connection', (socket) => {
     ];
     if (identityPhrases.some(phrase => lowerText.includes(phrase))) {
       const identityVariations = [
-        "I was developed by Pradyumna Tripathi, a third year student at Oriental Institute of Science and Technology (OIST), on 30 May 2026, specifically to assist the Madhya Pradesh Police Cyber Cell in cybercrime investigation and field-level support.",
-        "This system was created by Pradyumna Tripathi, a third year student at Oriental Institute of Science and Technology (OIST), on 30 May 2026, specifically to assist the Madhya Pradesh Police Cyber Cell in cybercrime investigation and field-level support.",
-        "I am a system built by Pradyumna Tripathi, a third year student at Oriental Institute of Science and Technology (OIST), on 30 May 2026, specifically to assist the Madhya Pradesh Police Cyber Cell in cybercrime investigation and field-level support.",
-        "I have been designed by Pradyumna Tripathi, a third year student at Oriental Institute of Science and Technology (OIST), on 30 May 2026, specifically to assist the Madhya Pradesh Police Cyber Cell in cybercrime investigation and field-level support."
+        "Namaste Sir! Main hoon Pradyumna, aapka Cyber Sahiyogi. Mujhe Pradyumna Tripathi ne develop kiya hai, jo Oriental Institute of Science and Technology (OIST) ke third year student hain. Mujhe 30 May 2026 ko banaya gaya, specifically Madhya Pradesh Police Cyber Cell ki cybercrime investigation aur field-level support ke liye.",
+        "Sir, main Pradyumna hoon, aapka Cyber Sahiyogi. Meri rachna Pradyumna Tripathi dwara ki gayi hai, jo Oriental Institute of Science and Technology (OIST) ke third year student hain. 30 May 2026 ko mujhe Madhya Pradesh Police Cyber Cell ke liye banaya gaya tha.",
+        "Ji Sir, main Pradyumna hoon — aapka trusted Cyber Sahiyogi. Mujhe Pradyumna Tripathi ne 30 May 2026 ko Oriental Institute of Science and Technology (OIST) mein develop kiya, Madhya Pradesh Police Cyber Cell ki cybercrime investigation mein sahayata ke liye.",
+        "Pranam Sir! Main Pradyumna, aapka Cyber Sahiyogi. Mujhe Pradyumna Tripathi, OIST ke third year student, ne 30 May 2026 ko design kiya hai — Madhya Pradesh Police Cyber Cell ke liye ek cybercrime assistance system ke roop mein."
       ];
       const strictIdentity = identityVariations[Math.floor(Math.random() * identityVariations.length)];
       const latency = Date.now() - startTime;
-      socket.emit('jarvis:cognition', { latency });
-      socket.emit('jarvis:done', { text: strictIdentity });
+      socket.emit('pradyumna:cognition', { latency });
+      socket.emit('pradyumna:done', { text: strictIdentity });
       await streamTTS(socket, strictIdentity);
       return;
     }
+    // ── V12.0 GENERAL COMMAND BYPASS — skip cyber mode for action commands ──
+    const generalActionWords = [
+      'open', 'close', 'start', 'launch', 'play', 'search for', 'find me',
+      'show me', 'go to', 'navigate', 'kholo', 'band karo', 'chalao',
+      'dikhao', 'shut down', 'restart', 'volume', 'brightness',
+      'tab', 'folder', 'file', 'notepad', 'calculator', 'calendar'
+    ];
+    const isGeneralCommand = generalActionWords.some(cmd => lowerText.includes(cmd));
+
     // ── V8.1 CYBER CRIME AUTO-DETECT & DIRECT RAG INJECTION ──
     const cyberKeywords = [
       'cyber', 'crime', 'fraud', 'phishing', 'hack', 'malware', 'ransomware',
-      'evidence', 'digital', 'forensic', 'fir', 'investigation', 'scam',
+      'evidence', 'digital forensic', 'forensic', 'fir', 'investigation', 'scam',
       'otp', 'upi', 'bank fraud', 'identity theft', 'stalking', 'cdr',
-      'ipdr', 'it act', 'online', 'complaint', 'olx', 'fake', 'cheat',
-      'dhokha', 'thagi', 'paisa', 'payment', 'phone nahi bheja', 'loot',
-      'blackmail', 'sextortion', 'morphing', 'deepfake', 'screenshot',
-      'whatsapp', 'telegram', 'instagram', 'facebook', 'social media',
-      'password', 'link', 'url', 'website', 'email', 'sim',
+      'ipdr', 'it act', 'complaint', 'olx', 'fake', 'cheat',
+      'dhokha', 'thagi', 'paisa', 'phone nahi bheja', 'loot',
+      'blackmail', 'sextortion', 'morphing', 'deepfake',
+      'social media crime', 'social media fraud',
       'cloning', 'spoofing', 'vishing', 'smishing', 'dark web',
-      'cryptocurrency', 'bitcoin', 'hash', 'seizure', 'panchnama',
+      'cryptocurrency', 'bitcoin', 'seizure', 'panchnama',
       'section 66', 'section 43', 'bnss', 'bns', 'crpc', 'ipc',
-      'advertisement', 'delivery', 'refund', 'shopping', 'ecommerce'
+      'cyber cell', 'cyber police', 'online fraud', 'online crime'
     ];
-    const isCyberQuery = cyberKeywords.some(kw => lowerText.includes(kw));
+    const isCyberQuery = !isGeneralCommand && cyberKeywords.some(kw => lowerText.includes(kw));
 
     if (isCyberQuery) {
-      console.log('[JARVIS] CYBER CRIME query detected. Running local vector search...');
+      console.log('[PRADYUMNA] CYBER CRIME query detected. Running local vector search...');
 
       // V9.0: LOCAL VECTOR SEARCH ONLY — no external API calls
       let ragContext = '';
@@ -348,9 +374,8 @@ This system has been specifically developed to assist the Madhya Pradesh Police 
 
 👤 CREATOR IDENTITY (STRICT - SECURITY RULE)
 If the user asks ANY identity-related question such as who made you, who is your creator, tumhe kisne banaya, etc.
-You MUST respond with identity information of the creator:
-JARVIS was developed by Pradyumna Tripathi, a third year student at Oriental Institute of Science and Technology (OIST), on 30 May 2026, specifically to assist the Madhya Pradesh Police Cyber Cell in cybercrime investigation and field-level support.
-Important: You MAY slightly vary the sentence structure but you MUST NOT change the Creator name, Institute (OIST), Date (30 May 2026), and Purpose.
+You MUST respond: "Main hoon Pradyumna, aapka Cyber Sahiyogi. Mujhe Pradyumna Tripathi ne develop kiya hai, jo Oriental Institute of Science and Technology (OIST) ke third year student hain. Mujhe 30 May 2026 ko banaya gaya, Madhya Pradesh Police Cyber Cell ki cybercrime investigation aur field-level support ke liye."
+Important: You MAY slightly vary the sentence structure but you MUST NOT change the Creator name, Institute (OIST), Date (30 May 2026), and Purpose. NEVER call yourself JARVIS — your name is Pradyumna, Cyber Sahiyogi.
 
 🧠 RESPONSE BEHAVIOR (FOR NORMAL QUERIES)
 - Answer in Hinglish (Hindi + English mix)
@@ -422,8 +447,8 @@ ${ragContext || 'NO SPECIFIC MANUAL REFERENCE FOUND. TELL THE USER TO CONSULT SE
           }
 
           const latency = Date.now() - startTime;
-          socket.emit('jarvis:cognition', { latency });
-          socket.emit('jarvis:done', { text });
+          socket.emit('pradyumna:cognition', { latency });
+          socket.emit('pradyumna:done', { text });
           await streamTTS(socket, text);
           cyberSuccess = true;
         } catch (err) {
@@ -474,14 +499,14 @@ Sir, sabhi AI models offline hain (rate limit) aur MHA manual mein direct exact 
    - Data surakshit rakhein aur 10 mins baad FIR/Investigation details verify karein. Sir, kya aap is format se santusht hain?`;
         }
         const latency = Date.now() - startTime;
-        socket.emit('jarvis:cognition', { latency });
-        socket.emit('jarvis:done', { text: offlineText });
+        socket.emit('pradyumna:cognition', { latency });
+        socket.emit('pradyumna:done', { text: offlineText });
         await streamTTS(socket, offlineText);
       }
       return;
     }
 
-    // ── GENERAL JARVIS MODE (non-cyber queries) ──
+    // ── GENERAL PRADYUMNA MODE (non-cyber queries) ──
     let messages = [
       { role: 'system', content: SYSTEM_PROMPT },
       { role: 'user', content: data.text }
@@ -511,7 +536,7 @@ Sir, sabhi AI models offline hain (rate limit) aur MHA manual mein direct exact 
         if (json.error) {
           // V9.6: AUTOMATIC MODEL FALLBACK FOR GENERAL MODE
           if (json.error.message.includes('Rate limit') && activeModel === 'llama-3.3-70b-versatile') {
-              console.warn(`[JARVIS] ${activeModel} rate limited. Switching to 8B fallback...`);
+              console.warn(`[PRADYUMNA] ${activeModel} rate limited. Switching to 8B fallback...`);
               return await runInference(depth, 'llama-3.1-8b-instant');
           }
           throw new Error(json.error.message);
@@ -520,11 +545,11 @@ Sir, sabhi AI models offline hain (rate limit) aur MHA manual mein direct exact 
         const message = json.choices[0].message;
 
         if (message.tool_calls) {
-          console.log(`[JARVIS] AI decided to use tools:`, message.tool_calls.map(tc => tc.function.name).join(', '));
+          console.log(`[PRADYUMNA] AI decided to use tools:`, message.tool_calls.map(tc => tc.function.name).join(', '));
           messages.push(message);
           for (const toolCall of message.tool_calls) {
             const result = await executeTool(toolCall.function.name, JSON.parse(toolCall.function.arguments));
-            console.log(`[JARVIS] TOOL_RESULT: ${toolCall.function.name} >>> ${result.substring(0, 100)}...`);
+            console.log(`[PRADYUMNA] TOOL_RESULT: ${toolCall.function.name} >>> ${result.substring(0, 100)}...`);
             messages.push({
               role: 'tool',
               tool_call_id: toolCall.id,
@@ -537,8 +562,8 @@ Sir, sabhi AI models offline hain (rate limit) aur MHA manual mein direct exact 
 
         const text = message.content;
         const latency = Date.now() - startTime;
-        socket.emit('jarvis:cognition', { latency });
-        socket.emit('jarvis:done', { text });
+        socket.emit('pradyumna:cognition', { latency });
+        socket.emit('pradyumna:done', { text });
         await streamTTS(socket, text);
 
       } catch (err) {
@@ -547,17 +572,17 @@ Sir, sabhi AI models offline hain (rate limit) aur MHA manual mein direct exact 
         if (err.message.includes('Rate limit') && activeModel !== 'llama-3.1-8b-instant') {
            return await runInference(depth, 'llama-3.1-8b-instant');
         }
-        socket.emit('jarvis:error', { message: 'Neural Link Disturbance: ' + (err.message.includes('Groq') ? 'API Error' : 'System Error') });
+        socket.emit('pradyumna:error', { message: 'Neural Link Disturbance: ' + (err.message.includes('Groq') ? 'API Error' : 'System Error') });
       }
     };
 
     runInference().catch(err => {
         console.error("Critical Inference Failure:", err);
-        socket.emit('jarvis:error', { message: 'Critical System Failure' });
+        socket.emit('pradyumna:error', { message: 'Critical System Failure' });
     });
   });
 
   socket.on('disconnect', () => { intervals.forEach(clearInterval); });
 });
 
-server.listen(PORT, '0.0.0.0', () => console.log(`[JARVIS] V7.1.1 STABLE Online on ${PORT} (0.0.0.0)`));
+server.listen(PORT, '0.0.0.0', () => console.log(`[PRADYUMNA] Cyber Sahiyogi Online on ${PORT} (0.0.0.0)`));
