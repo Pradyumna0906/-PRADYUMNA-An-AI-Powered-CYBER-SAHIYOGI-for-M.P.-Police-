@@ -363,7 +363,9 @@ io.on('connection', (socket) => {
       'evidence', 'digital forensic', 'forensic', 'fir', 'investigation', 'scam',
       'otp', 'upi', 'bank fraud', 'identity theft', 'stalking', 'cdr',
       'ipdr', 'it act', 'complaint', 'olx', 'fake', 'cheat',
-      'dhokha', 'thagi', 'paisa', 'phone nahi bheja', 'loot',
+      'dhokha', 'thagi', 'paisa', 'paise', 'paisa cut', 'paise cut', 'account', 
+      'bank account', 'message', 'msg', 'link', 'kyc', 'update kyc',
+      'phone nahi bheja', 'loot',
       'blackmail', 'sextortion', 'morphing', 'deepfake',
       'social media crime', 'social media fraud',
       'cloning', 'spoofing', 'vishing', 'smishing', 'dark web',
@@ -455,7 +457,8 @@ ${ragContext || 'NO SPECIFIC MANUAL REFERENCE FOUND. TELL THE USER TO CONSULT SE
               model,
               messages: cyberMessages,
               temperature: 0.3, // Lower temp for facts
-              max_tokens: 1024
+              max_tokens: 1024,
+              tool_choice: 'none' // CRITICAL: Prevent model from trying to use tools in cyber mode
             })
           });
           const json = await response.json();

@@ -752,46 +752,20 @@ async function executeTool(name, args) {
         console.log(`[CYBER-RAG] Query: "${args.question}"`);
         let ragAnswer = null;
 
-        // STEP 1: Try RAG API first
+        // ── V9.1: LOCAL PDF RAG PRIMARY (Faster on Render) ──
         try {
-          console.log('[CYBER-RAG] Calling RAG API at http://127.0.0.1:8000/ask ...');
-          const ragResponse = await fetch('http://127.0.0.1:8000/ask', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ question: args.question }),
-            signal: AbortSignal.timeout(10000) // 10 second timeout
-          });
-          const ragJson = await ragResponse.json();
-          console.log('[CYBER-RAG] API Response keys:', Object.keys(ragJson));
-          
-          // Try common response fields
-          const apiAnswer = ragJson.answer || ragJson.result || ragJson.response || ragJson.text || ragJson.output;
-          if (apiAnswer && apiAnswer.trim().length > 20) {
-            ragAnswer = apiAnswer;
-            console.log(`[CYBER-RAG] API SUCCESS — Answer length: ${ragAnswer.length}`);
+          const manualChunks = await searchManual(args.question, 5);
+          if (manualChunks.length > 0) {
+            ragAnswer = 'KNOWLEDGE BASE (MHA-ASCL Cyber Crime Investigation Manual):\n\n' + 
+              manualChunks.map((chunk, i) => `[Source ${i+1}]:\n${chunk}`).join('\n\n---\n\n');
+            console.log(`[CYBER-RAG] LOCAL PDF SUCCESS — ${manualChunks.length} chunks found.`);
           } else {
-            console.log('[CYBER-RAG] API returned insufficient answer, falling back to local PDF.');
+            ragAnswer = 'Knowledge base mein is topic par specific information nahi mili. Lekin main apne training knowledge se jawab de raha hoon.';
+            console.log('[CYBER-RAG] No matching chunks found in local store.');
           }
-        } catch (apiErr) {
-          console.warn(`[CYBER-RAG] API FAILED: ${apiErr.message}. Falling back to local PDF.`);
-        }
-
-        // STEP 2: Fallback to local PDF RAG store
-        if (!ragAnswer) {
-          try {
-            const manualChunks = await searchManual(args.question, 5);
-            if (manualChunks.length > 0) {
-              ragAnswer = 'KNOWLEDGE BASE (MHA-ASCL Cyber Crime Investigation Manual):\n\n' + 
-                manualChunks.map((chunk, i) => `[Source ${i+1}]:\n${chunk}`).join('\n\n---\n\n');
-              console.log(`[CYBER-RAG] LOCAL PDF SUCCESS — ${manualChunks.length} chunks found.`);
-            } else {
-              ragAnswer = 'Knowledge base mein is topic par specific information nahi mili. Lekin main apne training knowledge se jawab de raha hoon.';
-              console.log('[CYBER-RAG] No matching chunks found in local store.');
-            }
-          } catch (localErr) {
-            ragAnswer = 'Knowledge base access mein error aaya. Main apne training knowledge se jawab dunga.';
-            console.error(`[CYBER-RAG] Local search error: ${localErr.message}`);
-          }
+        } catch (localErr) {
+          ragAnswer = 'Knowledge base access mein error aaya. Main apne training knowledge se jawab dunga.';
+          console.error(`[CYBER-RAG] Local search error: ${localErr.message}`);
         }
 
         return ragAnswer;
